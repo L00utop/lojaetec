@@ -9,7 +9,6 @@ class Administrador{
     public function cadastrar(){
         $cx = new Conexao();
         $cmdSql = 'INSERT INTO administrador(email, senha, nome) VALUES (:email, :senha, :nome)';
-        $this->senha = $this->criptografarSenha($this->senha);
         $dados = [
             ':email' => $this->email, 
             ':senha' => $this->senha, 
@@ -25,57 +24,7 @@ class Administrador{
         }
     }
 
-    public function alterar(){
-        $cx = new Conexao();
-        $cmdSql = 'UPDATE administrador SET email=:email,senha=:senha,nome=:nome WHERE administrador.matricula = :matricula';
-        $this->senha = $this->criptografarSenha($this->senha);
-        $dados = [
-            ':matricula' => $this->matricula, 
-            ':email' => $this->email, 
-            ':senha' => $this->senha, 
-            ':nome' => $this->nome
-        ];
-
-        if($cx->update($cmdSql,$dados)){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-
-    public function delete($matricula){
-        $cx = new Conexao();
-        $cmdSql = 'DELETE FROM administrador WHERE matricula = :matricula';
-        
-        $dados = [
-            ':matricula' => $matricula
-        ];
-
-        if($cx->delete($cmdSql,$dados)){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-
-    public function alterarSenha(){
-        $cx = new Conexao();
-        $cmdSql = 'UPDATE administrador SET senha=:senha WHERE administrador.matricula = :matricula';
-        $this->senha = $this->criptografarSenha($this->senha);
-        $dados = [
-            ':matricula' => $this->matricula, 
-            ':senha' => $this->senha
-        ];
-
-        if($cx->update($cmdSql,$dados)){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
+    
 
     public function consultarTodos($filtro=''){
         $cx = new Conexao();
@@ -90,56 +39,5 @@ class Administrador{
         return false;        
     }
 
-    public function consultarPorEmail($email){
-        $cx = new Conexao();
-        $cmdSql = "SELECT * FROM administrador WHERE administrador.email = :email;";
-        $dados = [
-            ':email' => $email            
-        ];
-        $result = $cx->select($cmdSql,$dados);
-        if($result){
-            $result->setFetchMode(PDO::FETCH_CLASS, 'Administrador');
-            $adm = $result->fetch();
-            $this->matricula = $adm->matricula;
-            $this->email = $adm->email;	
-            $this->senha = $adm->senha;	
-            $this->nome = $adm->nome;
-            return true;
-        }
-        return false;        
-    }
-
-    public function consultarPorMatricula($matricula){
-        $cx = new Conexao();
-        $cmdSql = "SELECT * FROM administrador WHERE administrador.matricula = :m;";
-        $dados = [
-            ':m' => $matricula            
-        ];
-        $result = $cx->select($cmdSql,$dados);
-        if($result){
-            $result->setFetchMode(PDO::FETCH_CLASS, 'Administrador');
-            $adm = $result->fetch();
-            $this->matricula = $adm->matricula;
-            $this->email = $adm->email;	
-            $this->senha = $adm->senha;	
-            $this->nome = $adm->nome;
-            return true;
-        }
-        return false;        
-    }
-
-    private function criptografarSenha($senha): string{
-        return password_hash($senha,PASSWORD_BCRYPT,['cost' => 12]);
-    }
-
-    private function decriptografarSenha($senha, $criptografia):bool{
-        return password_verify($senha, $criptografia);
-    }
-
-    public function login($usuario,$senha):bool{
-        if($this->consultarPorEmail($usuario) or $this->consultarPorMatricula($usuario)){
-            return $this->decriptografarSenha($senha,$this->senha);
-        }
-        return false;
-    }
+    
 }
